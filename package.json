@@ -12,8 +12,10 @@
   "dependencies": {
     "@hapi/hapi": "^21.3.9",
     "bcrypt": "^5.1.1",
+    "crypto": "^1.0.1",
     "dotenv": "^16.4.5",
     "jsonwebtoken": "^9.0.2",
-    "mysql2": "^3.9.7"
+    "mysql2": "^3.9.7",
+    "nodemailer": "^6.9.13"
   }
 }

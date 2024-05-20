@@ -1,4 +1,14 @@
-const { register, login, createNote, getNotes, getNoteById } = require("./Handler");
+const {
+    register,
+    login,
+    createNote,
+    getNotes,
+    getNoteById,
+    requestPasswordReset,
+    resetPassword,
+    updateNote,
+    deleteNote
+} = require("./Handler");
 
 const Routes = [
     {
@@ -18,14 +28,34 @@ const Routes = [
     },
     {
         method: "GET",
-        path: "/note",
+        path: "/notes",
         handler: getNotes,
     },
     {
         method: "GET",
         path: "/note/{noteId}",
         handler: getNoteById,
-    }
+    },
+    {
+        method: "POST",
+        path: "/request-password-reset",
+        handler: requestPasswordReset,
+    },
+    {
+        method: "POST",
+        path: "/reset-password",
+        handler: resetPassword,
+    },
+    {
+        method: "PUT",
+        path: "/note/{noteId}",
+        handler: updateNote,
+    },
+    {
+        method: "DELETE",
+        path: "/note/{id}",
+        handler: deleteNote,
+    },
 ];
 
 module.exports = Routes;
