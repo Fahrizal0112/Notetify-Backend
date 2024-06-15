@@ -185,7 +185,7 @@ const requestPasswordReset = async (request, h) => {
 
         const userId = rows[0].id;
         const token = crypto.randomBytes(20).toString('hex');
-        const expires = new Date(Date.now() + 3600000); // Token valid for 1 hour
+        const expires = new Date(Date.now() + 3600000); 
 
         await connection.execute(
             'INSERT INTO password_resets (user_id, token, expires) VALUES (?, ?, ?)',
@@ -227,6 +227,52 @@ const requestPasswordReset = async (request, h) => {
         connection.end();
     }
 };
+
+const createReminder = async (request, h) => {
+    const { noteId, title, content, reminderDate } = request.payload;
+    const token = request.headers.authorization;
+
+    try {
+        const decoded = jwt.verify(token.split(' ')[1], process.env.JWT_SECRET);
+        const userId = decoded.id;
+
+        const connection = await createConnection();
+
+        try {
+            let noteIdToUse = noteId;
+
+            if (!noteId) {
+                const [result] = await connection.execute(
+                    'INSERT INTO notes (user_id, title, content, created_at) VALUES (?, ?, ?, ?)',
+                    [userId, title, content, new Date()]
+                );
+
+                noteIdToUse = result.insertId;
+            } else {
+                const [noteRows] = await connection.execute('SELECT * FROM notes WHERE id = ? AND user_id = ?', [noteId, userId]);
+                if (noteRows.length === 0) {
+                    return h.response({ message: 'Note not found or you do not have permission' }).code(404);
+                }
+            }
+
+            const [reminderResult] = await connection.execute(
+                'INSERT INTO reminders (note_id, title, reminder_date, created_at) VALUES (?, ?, ?, ?)',
+                [noteIdToUse, title, reminderDate, new Date()]
+            );
+
+            return h.response({ message: 'Reminder created successfully', reminder_id: reminderResult.insertId }).code(201);
+        } catch (err) {
+            console.error(err);
+            return h.response({ message: 'Internal Server Error' }).code(500);
+        } finally {
+            connection.end();
+        }
+    } catch (error) {
+        console.error(error);
+        return h.response({ message: 'Unauthorized' }).code(401);
+    }
+};
+
 
 const resetPassword = async (request, h) => {
     const { token, newPassword } = request.payload;
@@ -274,5 +320,6 @@ module.exports = {
     requestPasswordReset,
     resetPassword,
     updateNote,
-    deleteNote
+    deleteNote,
+    createReminder
 };

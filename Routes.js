@@ -7,7 +7,8 @@ const {
     requestPasswordReset,
     resetPassword,
     updateNote,
-    deleteNote
+    deleteNote,
+    createReminder
 } = require("./Handler");
 
 const Routes = [
@@ -56,6 +57,11 @@ const Routes = [
         path: "/note/{id}",
         handler: deleteNote,
     },
+    {
+        method: "POST",
+        path: "/reminder",
+        handler:createReminder
+    }
 ];
 
 module.exports = Routes;
