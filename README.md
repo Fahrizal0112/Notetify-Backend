@@ -181,3 +181,4 @@ This project is a simple Notes and Reminders application built with Node.js, Exp
 
 ## License
 Muchammad Fahrizal
+https://www.linkedin.com/in/muchammad-fahrizal/
