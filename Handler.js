@@ -192,7 +192,6 @@ const requestPasswordReset = async (request, h) => {
             [userId, token, expires]
         );
 
-        // Send email with reset link (example using nodemailer)
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             secure:true,
@@ -273,6 +272,113 @@ const createReminder = async (request, h) => {
     }
 };
 
+const getReminderById = async (request, h) => {
+    const token = request.header.authorization;
+
+    try{
+        const decoded = jwt.verify(token.split(' ')[1],process.env.JWT_SECRET);
+        const userId = decoded.id;
+        const {id} = request.params;
+
+        const connection = await createConnection();
+
+        try {
+            const [rows] = await connection.execute(
+               `SELECT r.* FROM reminders r JOIN notes n ON r.note_id = n.id WHERE r.id = ? AND n.user_id = ?`,
+                [id, userId]
+            );
+            if (rows.length === 0 ){
+                return h.response({ message: 'Reminder not found'}),code(404);
+            }
+            return h.response(rows[0]).code(200);
+        } catch (err) {
+            return h.response({ message: 'Internal Server Error'}).code(500);
+        } finally {
+            connection.end();
+        }
+    } catch (error) {
+        console.error(error);
+        return h.response({message : 'Unauthorized'}).code(401);
+    }
+};
+
+const updateReminder = async (request, h) => {
+    const token = request.headers.authorization;
+
+    // Verifikasi token JWT
+    try {
+        const decoded = jwt.verify(token.split(' ')[1], process.env.JWT_SECRET);
+        const userId = decoded.id;
+        const { id } = request.params;
+        const { title, reminderDate } = request.payload;
+
+        const connection = await createConnection();
+
+        try {
+            // Periksa apakah reminder dengan id tertentu ada dan milik user
+            const [rows] = await connection.execute(
+                `SELECT r.* FROM reminders r JOIN notes n ON r.note_id = n.id WHERE r.id = ? AND n.user_id = ?`,
+                [id, userId]
+            );
+            if (rows.length === 0) {
+                return h.response({ message: 'Reminder not found or you do not have permission' }).code(404);
+            }
+
+            // Update reminder
+            await connection.execute(
+                'UPDATE reminders SET title = ?, reminder_date = ? WHERE id = ?',
+                [title, reminderDate, id]
+            );
+
+            return h.response({ message: 'Reminder updated successfully' }).code(200);
+        } catch (err) {
+            console.error(err);
+            return h.response({ message: 'Internal Server Error' }).code(500);
+        } finally {
+            connection.end();
+        }
+    } catch (error) {
+        console.error(error);
+        return h.response({ message: 'Unauthorized' }).code(401);
+    }
+};
+
+const deleteReminder = async (request, h) => {
+    const token = request.headers.authorization;
+
+    // Verifikasi token JWT
+    try {
+        const decoded = jwt.verify(token.split(' ')[1], process.env.JWT_SECRET);
+        const userId = decoded.id;
+        const { id } = request.params;
+
+        const connection = await createConnection();
+
+        try {
+            // Periksa apakah reminder dengan id tertentu ada dan milik user
+            const [rows] = await connection.execute(
+                `SELECT r.* FROM reminders r JOIN notes n ON r.note_id = n.id WHERE r.id = ? AND n.user_id = ?`,
+                [id, userId]
+            );
+            if (rows.length === 0) {
+                return h.response({ message: 'Reminder not found or you do not have permission' }).code(404);
+            }
+
+            // Hapus reminder
+            await connection.execute('DELETE FROM reminders WHERE id = ?', [id]);
+
+            return h.response({ message: 'Reminder deleted successfully' }).code(200);
+        } catch (err) {
+            console.error(err);
+            return h.response({ message: 'Internal Server Error' }).code(500);
+        } finally {
+            connection.end();
+        }
+    } catch (error) {
+        console.error(error);
+        return h.response({ message: 'Unauthorized' }).code(401);
+    }
+};
 
 const resetPassword = async (request, h) => {
     const { token, newPassword } = request.payload;
@@ -321,5 +427,8 @@ module.exports = {
     resetPassword,
     updateNote,
     deleteNote,
-    createReminder
+    createReminder,
+    getReminderById,
+    updateReminder,
+    deleteReminder
 };

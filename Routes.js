@@ -8,7 +8,10 @@ const {
     resetPassword,
     updateNote,
     deleteNote,
-    createReminder
+    createReminder,
+    updateReminder,
+    getReminderById,
+    deleteReminder
 } = require("./Handler");
 
 const Routes = [
@@ -61,7 +64,22 @@ const Routes = [
         method: "POST",
         path: "/reminder",
         handler:createReminder
-    }
+    },
+    {
+        method: "PUT",
+        path: "/reminder/{id}",
+        handler:updateReminder
+    },
+    {
+        method: "GET",
+        path: "/reminder/{id}",
+        handler:getReminderById
+    },
+    {
+        method: "DELETE",
+        path: "/reminder/{id}",
+        handler:deleteReminder
+    },
 ];
 
 module.exports = Routes;
