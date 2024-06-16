@@ -1,4 +1,4 @@
-# Notes and Reminders Application
+# Notetify - Notes and Reminders Application
 
 This project is a simple Notes and Reminders application built with Node.js, Express, and MySQL. It allows users to register, login, create notes, set reminders, and manage their data securely using JWT authentication.
 
@@ -19,8 +19,8 @@ This project is a simple Notes and Reminders application built with Node.js, Exp
 
 1. **Clone the repository:**
     ```sh
-    git clone https://github.com/yourusername/notes-reminders-app.git
-    cd notes-reminders-app
+    git clone https://github.com/fach3f/Notetify-Backend.git
+    cd Notetify-Backend
     ```
 
 2. **Install dependencies:**
